@@ -1,15 +1,9 @@
 import { createAgent, initChatModel, tool } from "langchain";
 import z from "zod";
 import * as fs from "fs";
+import { MemorySaver } from "@langchain/langgraph";
 // add description of this file and what all langchain features it is using in the comments here.
-/*
-This file defines an agent that provides weather information based on the user's location. 
-It uses tools to get the user's location and the weather information, and it has a custom system prompt to guide the agent's behavior. 
-The agent also has a custom response format that includes both a humorous response and the weather information.
 
-The agent is invoked with a user message asking for the weather, and it uses the tools to determine the user's location and provide the weather information in a humorous way.
-additionally optimized model configuration with temperature, max tokens and timeout to ensure the agent's responses are creative, concise, and timely.
-*/
 
 const usersData = JSON.parse(fs.readFileSync("data/users.json", "utf8"));
 
@@ -45,11 +39,15 @@ const getWether = tool((input) => {
 });
 
 const config= {
-    context: {user_id: "103"}
+    configurable: {thread_id: "a"},
+    context: {user_id: "103"},
+    db:{}
 }
 
 const qaConfig= {
-    context: {user_id: "105"}
+    configurable: {thread_id: "a"},
+    context: {user_id: "105"},
+    db:{}
 }
 
 const system_Prompt = `You are a helpful assistant that provides weather information based on the user's location. you also have a great sense of humor and always try to make the user laugh with your responses.
@@ -65,17 +63,20 @@ const resposne_Format = z.object({
     weather_response: z.string().describe("The weather information for the user's location.")   
 });
 
-const model  =  await initChatModel("gpt-5-nano", {
+const model  =  await initChatModel("gpt-4o-mini", {
     temperature: 0.7,
-    max_tokens: 1000,
+    max_tokens: 500,
     timeout: 10000
 });
+
+const checkPointer = new MemorySaver();
 
 const agent = createAgent({
     model: model,
     tools: [getUserLocation, getWether],
     systemPrompt: system_Prompt,
     responseFormat: resposne_Format
+   // memory: checkPointer
 });
 
 // Invoke the agent with a message and handle the response
@@ -85,7 +86,40 @@ agent.invoke({
 qaConfig
 ).then((response) => {
     //console.log(response);
-    console.log(" Structured message: " + response.structuredResponse);
+    console.log(" Structured message: " + response.structuredResponse.humour_response);
 }).catch((error) => {
     console.error(error);
 });
+
+
+const response = await agent.invoke({
+     messages:[{role: "user", content: "What location did you just tell me about?" }]
+},
+qaConfig
+);
+console.log(" Structured message: " + response.structuredResponse.humour_response);
+
+
+const response1 = await agent.invoke({
+     messages:[{role: "user", content: "Suggest a good place in that location?" }]
+},
+qaConfig
+);
+console.log(" Structured message: " + response1.structuredResponse.humour_response);
+
+// Below invocation is with different configuration, different thread. So the agent will not have access to the previous conversation and will not be able to use the memory to recall the location. It will have to use the get_user_location tool again to get the location based on the user ID in the new configuration context.
+const response2 = await agent.invoke({
+     messages:[{role: "user", content: "Suggest a good place in that location?" }]
+},
+config
+);
+console.log(" Structured message: " + response2.structuredResponse.humour_response);
+
+/*
+Results:
+ Structured message: Looks like the sun is showing off in Delhi today at a sizzling 25°C! Don't forget your sunglasses, unless you want to audition for a role in the next big movie: "The Blind and the Beautiful."
+ Structured message: Well, I just told you about Delhi! You know, the city where traffic jams are a popular tourist attraction!
+ Structured message: Well, if you’re in Delhi, you might as well visit India Gate! It’s a great place for a leisurely stroll, and if you get bored, just pretend you’re a historical figure and strike a pose!
+ Structured message: Well, if you're in Tokyo, you can always visit the famous Shibuya Crossing! It's like watching a beautiful ballet of humans and traffic! Just make sure to not get swept away, or you might end up in a reality show!
+
+*/
