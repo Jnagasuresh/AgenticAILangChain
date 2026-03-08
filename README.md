@@ -10,7 +10,21 @@
 > npm install @langchain/anthropic
 
 > npx tsx Basics/BasicAgent.ts 
+
+> npm install @langchain/community @langchain/core pdf-parse
+
+> npm i @langchain/textsplitters
 ```
 
 
+### Rag Application
+Load documents from various sources (PDF, word docs, etc.)
+```
+ npm install @langchain/community @langchain/core pdf-parse
 
+ ```
+### Text Splitters
+Split large documents into manageable chunks
+```
+npm i @langchain/textsplitters
+```
