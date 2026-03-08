@@ -1,8 +1,14 @@
-import { createAgent, initChatModel, tool } from "langchain";
+import { createAgent, createMiddleware, initChatModel, tool } from "langchain";
 import z from "zod";
 import * as fs from "fs";
 import { MemorySaver } from "@langchain/langgraph";
+import { ChatOpenAI } from "@langchain/openai";
 // add description of this file and what all langchain features it is using in the comments here.
+/*
+Model Middleware: This file demonstrates how to create a custom middleware for 
+dynamic model selection based on the number of messages in the conversation. 
+The middleware checks the message count and selects either an advanced model or a basic model accordingly.
+*/
 
 
 const usersData = JSON.parse(fs.readFileSync("data/users.json", "utf8"));
@@ -62,19 +68,35 @@ const resposne_Format = z.object({
     weather_response: z.string().describe("The weather information for the user's location.")
 });
 
-const model = await initChatModel("gpt-4o-mini", {
+const advancedModel = await initChatModel("gpt-4o", {
     temperature: 0.7,
     max_tokens: 500,
     timeout: 10000
 });
 
-const checkPointer = new MemorySaver();
+
+const basesicModel = new ChatOpenAI({
+    model: "gpt-4o-mini"
+});
+
+
+const dynamicModelSelction = createMiddleware({
+    name: "dynamic_model_selection",
+    wrapModelCall: (request, handler) => {
+        const messageCount = request.messages.length
+        return handler({
+            ...request,
+            model: messageCount > 3 ? advancedModel : basesicModel
+        });
+    }
+});
 
 const agent = createAgent({
-    model: model,
+    model: basesicModel,
     tools: [getUserLocation, getWether],
     systemPrompt: system_Prompt,
-    responseFormat: resposne_Format
+    responseFormat: resposne_Format,
+    middleware: [dynamicModelSelction]
     // memory: checkPointer
 });
 
@@ -84,19 +106,11 @@ agent.invoke({
 },
     qaConfig
 ).then((response) => {
-    //console.log(response);
-    console.log(" Structured message: " + response.structuredResponse.humour_response);
+    console.log(response);
+    //console.log(" Structured message: " + response.structuredResponse.humour_response);
 }).catch((error) => {
     console.error(error);
 });
-
-
-const response = await agent.invoke({
-    messages: [{ role: "user", content: "What location did you just tell me about?" }]
-},
-    qaConfig
-);
-console.log(" Structured message: " + response.structuredResponse.humour_response);
 
 
 const response1 = await agent.invoke({
@@ -110,15 +124,13 @@ console.log(" Structured message: " + response1.structuredResponse.humour_respon
 const response2 = await agent.invoke({
     messages: [{ role: "user", content: "Suggest a good place in that location?" }]
 },
-    config
+    qaConfig
 );
 console.log(" Structured message: " + response2.structuredResponse.humour_response);
 
 /*
-Results:
- Structured message: Looks like the sun is showing off in Delhi today at a sizzling 25°C! Don't forget your sunglasses, unless you want to audition for a role in the next big movie: "The Blind and the Beautiful."
- Structured message: Well, I just told you about Delhi! You know, the city where traffic jams are a popular tourist attraction!
- Structured message: Well, if you’re in Delhi, you might as well visit India Gate! It’s a great place for a leisurely stroll, and if you get bored, just pretend you’re a historical figure and strike a pose!
- Structured message: Well, if you're in Tokyo, you can always visit the famous Shibuya Crossing! It's like watching a beautiful ballet of humans and traffic! Just make sure to not get swept away, or you might end up in a reality show!
-
+output of this file will be similar to the agent_customize_features.ts file, but the model used for the first few messages will be 
+gpt-4o-mini and once the message count exceeds 3, it will switch to gpt-4o for generating responses. 
+This allows for dynamic model selection based on the conversation context and can help optimize performance and 
+cost while still providing high-quality responses when needed.
 */
