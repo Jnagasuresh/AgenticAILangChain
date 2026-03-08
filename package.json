@@ -19,6 +19,7 @@
     "@types/node": "^25.3.5",
     "dotenv": "^16.4.5",
     "langchain": "^1.2.30",
+    "mammoth": "^1.11.0",
     "pdf-parse": "^1.1.1",
     "tsx": "4.21.0",
     "typescript": "^5.9.3",

@@ -2,6 +2,7 @@ import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import { MemoryVectorStore } from "@langchain/classic/vectorstores/memory";
+import { createAgent, dynamicSystemPromptMiddleware } from "langchain";
 
 // This file demonstrates how to use the PDFLoader from the Langchain library to load and read the contents of a PDF document.
 // The PDFLoader is a utility that allows you to easily extract text from PDF files, which can then be used for various applications such as document analysis, information retrieval, or feeding into a language model for further processing.
@@ -29,14 +30,33 @@ const embeddings = new OpenAIEmbeddings({
 const vectorStore = new MemoryVectorStore(embeddings);
 await vectorStore.addDocuments(alldocs);
 
-const query = "when was NIKE incorporated?";
-const results = await vectorStore.similaritySearch(query);
-console.log(results);
-
-const retriver = vectorStore.asRetriever({
-    //searchType : "similarity",
-    searchType : "mmr",
-    searchKwargs : {
-        fetchK: 1
-    }
+const ragMiddleware = dynamicSystemPromptMiddleware(async (state) =>{
+    const userMessage = state.messages[0].content;
+    const query = typeof userMessage === "string" ? userMessage : "";
+    const reretrivedResults = await vectorStore.similaritySearch(query,2);
+    const docsContent = reretrivedResults.map(result => result.pageContent).join("\n");
+    
+    const systemPrompt = `You are a helpful assistant that provides information based on the 
+    contents of a PDF document about Nike's financial performance. Use the following context from the document to answer the 
+    user's query:\n\n${docsContent}`;
+    return systemPrompt;
 });
+
+const agent = createAgent({
+    model: "gpt-4o",
+    systemPrompt: "You are a helpful assistant that provides information based on the contents of a PDF document about Nike's financial performance. Use the tools at your disposal to retrieve relevant information from the document and provide accurate and concise answers to the user's queries.",
+    tools: [],
+    middleware: [ragMiddleware]
+});
+
+const response = await agent.invoke({
+    messages: [{ role: "user", content: "When was NIKE incorporated?" }]
+});
+
+console.log(response);
+
+/* Response from above code execution:
+ AIMessage {
+      "id": "chatcmpl-DH6Dmxvfs4Ldq8lIfreeaflb8hKbX",
+      "content": "NIKE was incorporated in 1967 under the laws of the State of Oregon.",
+*/

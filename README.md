@@ -23,6 +23,12 @@ Load documents from various sources (PDF, word docs, etc.)
  npm install @langchain/community @langchain/core pdf-parse
 
  ```
+
+ Load .docx documents
+ ```
+ npm install @langchain/community @langchain/core mammoth
+ ```
+ 
 ### Text Splitters
 Split large documents into manageable chunks
 ```
