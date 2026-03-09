@@ -28,9 +28,16 @@ Load documents from various sources (PDF, word docs, etc.)
  ```
  npm install @langchain/community @langchain/core mammoth
  ```
- 
+
 ### Text Splitters
 Split large documents into manageable chunks
 ```
 npm i @langchain/textsplitters
+```
+
+### LangChain MCP Server
+```
+npm install @langchain/mcp-adapters
+
+npm install @langchain/mcp-adapters --legacy-peer-deps
 ```
