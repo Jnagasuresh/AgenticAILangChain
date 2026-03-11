@@ -21,7 +21,6 @@ for(const path of pdfPaths){
 }
 
 
-
 const textSplitter = new RecursiveCharacterTextSplitter({
 	chunkSize: 1000,
 	chunkOverlap: 200,
