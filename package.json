@@ -21,7 +21,7 @@
     "dotenv": "^16.4.5",
     "langchain": "^1.2.30",
     "mammoth": "^1.11.0",
-    "pdf-parse": "^1.1.1",
+    "pdf-parse": "^1.1.4",
     "tsx": "4.21.0",
     "typescript": "^5.9.3",
     "zod": "^3.25.76"
