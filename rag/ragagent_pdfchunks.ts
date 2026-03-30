@@ -5,7 +5,7 @@ import { MemoryVectorStore } from "@langchain/classic/vectorstores/memory";
 
 // This file demonstrates how to use the PDFLoader from the Langchain library to load and read the contents of a PDF document.
 // The PDFLoader is a utility that allows you to easily extract text from PDF files, which can then be used for various applications such as document analysis, information retrieval, or feeding into a language model for further processing.
-const loader = new PDFLoader("C:\\src\\docs\\nke-10k-2023.pdf");
+const loader = new PDFLoader("./docs/nke-10k-2023.pdf");
 const docs = await loader.load();
 
 console.log(docs.length);

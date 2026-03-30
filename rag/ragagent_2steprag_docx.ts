@@ -7,14 +7,14 @@ import { DocxLoader } from "@langchain/community/document_loaders/fs/docx";
 
 // Word docs
 const DocxPaths =[
-    "C:\\src\\docs\\nike-growth-story.docx"
+    "./docs/nike-growth-story.docx"
 ];
 
 // PDF docs
 const pdfPaths =[
-    "C:\\src\\docs\\nke-10k-2023.pdf",
-    "C:\\src\\docs\\Nike-Inc-2025_10K.pdf",
-    "C:\\src\\docs\\nike-growth-story.pdf"
+    "./docs/nke-10k-2023.pdf",
+    "./docs/Nike-Inc-2025_10K.pdf",
+    "./docs/nike-growth-story.pdf"
 ];
 
 

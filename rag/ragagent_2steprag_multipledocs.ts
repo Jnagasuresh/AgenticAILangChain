@@ -8,9 +8,9 @@ import { createAgent, dynamicSystemPromptMiddleware } from "langchain";
 // The PDFLoader is a utility that allows you to easily extract text from PDF files, which can then be used for various applications such as document analysis, information retrieval, or feeding into a language model for further processing.
 
 const pdfPaths =[
-    "C:\\src\\docs\\nke-10k-2023.pdf",
-    "C:\\src\\docs\\Nike-Inc-2025_10K.pdf",
-    "C:\\src\\docs\\nike-growth-story.pdf"
+    "./docs/nke-10k-2023.pdf",
+    "./docs/Nike-Inc-2025_10K.pdf",
+    "./docs/nike-growth-story.pdf"
 ];
 
 const allDocs=[];

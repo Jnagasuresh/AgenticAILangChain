@@ -55,9 +55,9 @@ export class MCPAgent extends BaseRagAgent {
 }
 
 const pdfPaths = [
-    "C:\\src\\docs\\nke-10k-2023.pdf",
+    "./docs/nke-10k-2023.pdf",
     //"C:\\src\\docs\\Nike-Inc-2025_10K.pdf",
-    "C:\\src\\docs\\nike-growth-story.pdf"
+    "./docs/nike-growth-story.pdf"
 ];
 
 const agent = new MCPAgent(pdfPaths);
