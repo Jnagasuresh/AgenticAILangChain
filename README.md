@@ -22,6 +22,9 @@ This sub-project within the `rag` folder contains a collection of TypeScript fil
 - **MemoryVectorStore**: A simple, in-memory vector database for storing and searching document embeddings.
 - **Model Context Protocol (MCP)**: Used in `ragagent_mcp.ts` to extend agent capabilities with external tools.
 
+### Architecture:
+<img width="1201" height="631" alt="Rag_arc" src="https://github.com/user-attachments/assets/1ac0d2ae-b553-452a-9af8-8ae6c2902416" />
+
 ### Prerequisites
 
 - Node.js and TypeScript installed.
